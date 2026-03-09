@@ -1,26 +1,44 @@
 [package]
-name = "my-esp-project"
+name = "hello-world"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.88"
 
 [[bin]]
-name = "my-esp-project"
+name = "hello-world"
 path = "./src/bin/main.rs"
+test = false
+
+[[test]]
+name    = "hello_test"
+harness = false
+
+[lib]
+test = false
 
 [dependencies]
 esp-hal = { version = "~1.0", features = [
     "esp32c6",
+    "unstable",
+    "defmt",
 ] }
 
 
 esp-bootloader-esp-idf = { version = "0.4.0", features = [
+    "defmt",
     "esp32c6",
 ] }
+defmt = "1.0.1"
 
-rtt-target = "0.6.2"
+rtt-target = { version = "0.6.2", features = ["defmt"] }
+panic-rtt-target = { version = "0.2.0", features = ["defmt"] }
+esp-alloc = { version = "0.9.0", features = ["defmt"] }
 critical-section = "1.2.0"
 
+[dev-dependencies]
+embedded-test = { version = "0.7.0", features = [
+    "defmt",
+] }
 
 [profile.dev]
 # Rust debug is too slow.
