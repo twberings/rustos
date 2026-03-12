@@ -1,13 +1,8 @@
 [package]
-name = "hello-world"
+name = "rustos"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.88"
-
-[[bin]]
-name = "hello-world"
-path = "./src/bin/main.rs"
-test = false
 
 [[test]]
 name    = "hello_test"
