@@ -34,6 +34,6 @@ impl Task {
     pub fn run(&mut self) {
         self.state = TaskState::Running;
         (self.entry)(self);
-        // self.state = TaskState::Ready;
+        self.state = TaskState::Ready;
     }
 }

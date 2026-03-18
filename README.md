@@ -13,6 +13,9 @@ RusTOS is a real-time operating system (RTOS) written in Rust. The goal of this 
  - [ ] Timers
  - [ ] Networking
 
+ TODO: Research rtos features.
+
+
 ## Similar Projects
  - [Embassy](https://embassy.dev/) - An async embedded framework for Rust. It uses the native async/await syntax and provides a high-level API for embedded development. It is designed to be portable across different platforms and architectures.
  - [esp-rtos](https://crates.io/crates/esp-rtos) - This crate is provided by Espressif to be used in combination with their other ESP crates.
