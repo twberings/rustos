@@ -7,7 +7,12 @@ RusTOS is a real-time operating system (RTOS) written in Rust. The goal of this 
 
 ## Milestones
  - [ ] Tasks
+    - [x] Task creation
+    - [x] Passing arguments to tasks
+    - [ ] Non-blocking task delay
  - [ ] Scheduler
+    - [x] Cooperative scheduling
+    - [ ] Preemptive scheduling
  - [ ] Mutex
  - [ ] Queues
  - [ ] Timers
