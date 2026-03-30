@@ -1,0 +1,28 @@
+@startuml
+rectangle "Scheduler" as scheduler
+scheduler --> TaskList
+rectangle "TaskList" {
+  rectangle "Task 1" {
+    rectangle "Task" as task1
+    task1 -d- Context
+    task1 -d- State
+    rectangle "Run"
+    task1 -d- Run
+    note bottom of Run : User defined struct\nimplementing the Run trait
+  }
+  rectangle "Task 2" {
+    rectangle "Task 2" as task2
+    task2 -d- "Context 2"
+    task2 -d- "State 2"
+    rectangle "Run 2" as Run2
+    task2 -d- Run2
+  }
+  rectangle "Task 3" {
+    rectangle "Task 3" as task3
+    task3 -d- "Context 3"
+    task3 -d- "State 3"
+    rectangle "Run 3" as Run3
+    task3 -d- Run3
+  }
+}
+@enduml
