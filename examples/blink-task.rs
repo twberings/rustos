@@ -24,7 +24,7 @@ struct BlinkTask {
     number: Mutex<RefCell<u32>>,
 }
 
-impl Task for BlinkTask {
+impl Run for BlinkTask {
     fn run(&self) {
         self.delay.delay_millis(1000);
         critical_section::with(|cs| {
@@ -40,7 +40,6 @@ static BLINK_TASK: BlinkTask = BlinkTask {
     number: Mutex::new(RefCell::new(0)),
 };
 
-static TASKS: &[&dyn Task] = &[&BLINK_TASK];
 
 #[allow(
     clippy::large_stack_frames,
@@ -53,6 +52,6 @@ fn main() -> ! {
     let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
     let _peripherals = esp_hal::init(config);
 
-    Scheduler::init(TASKS);
+    Scheduler::init(task_list![&BLINK_TASK]);
     Scheduler::run();
 }
