@@ -1,0 +1,11 @@
+@startuml
+Timer->Interrupt: Trigger interrupt
+activate Interrupt
+Interrupt->Interrupt: Save current task context
+Interrupt->Scheduler: Call scheduler
+activate Scheduler
+Scheduler->Interrupt: Return new task context
+deactivate Scheduler
+Interrupt->Interrupt: Load new task context
+deactivate Interrupt
+@enduml
