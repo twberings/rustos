@@ -1,6 +1,7 @@
 #![no_std]
 pub mod scheduler;
 pub mod task;
+pub mod timer;
 
 pub mod prelude {
     pub use crate::scheduler::*;

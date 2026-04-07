@@ -14,6 +14,8 @@ use defmt::info;
 use esp_hal::clock::CpuClock;
 use esp_hal::delay::Delay;
 use esp_hal::main;
+use esp_hal::timer::timg::TimerGroup;
+use esp_hal::timer::timg::etm::Tasks;
 use panic_rtt_target as _;
 use rustos::prelude::*;
 
@@ -40,7 +42,6 @@ static BLINK_TASK: BlinkTask = BlinkTask {
     number: Mutex::new(RefCell::new(0)),
 };
 
-
 #[allow(
     clippy::large_stack_frames,
     reason = "it's not unusual to allocate larger buffers etc. in main"
@@ -50,7 +51,10 @@ fn main() -> ! {
     rtt_target::rtt_init_defmt!();
 
     let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
-    let _peripherals = esp_hal::init(config);
+    let peripherals = esp_hal::init(config);
+    let timg0 = TimerGroup::new(peripherals.TIMG0);
+    let mut _timer0 = timg0.timer0;
+    _timer0.cnt_start();
 
     Scheduler::init(task_list![&BLINK_TASK]);
     Scheduler::run();
