@@ -17,6 +17,8 @@ RusTOS is a real-time operating system (RTOS) written in Rust. The goal of this 
  - [ ] Queues
  - [ ] Timers
  - [ ] Networking
+ - [ ] Research document
+ - [ ] User guide
 
  TODO: Research rtos features.
 

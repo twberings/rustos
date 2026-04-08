@@ -14,10 +14,11 @@ use defmt::info;
 use esp_hal::clock::CpuClock;
 use esp_hal::delay::Delay;
 use esp_hal::main;
+use esp_hal::timer::PeriodicTimer;
 use esp_hal::timer::timg::TimerGroup;
-use esp_hal::timer::timg::etm::Tasks;
 use panic_rtt_target as _;
 use rustos::prelude::*;
+use rustos::timer::start_timer;
 
 esp_bootloader_esp_idf::esp_app_desc!();
 
@@ -28,7 +29,7 @@ struct BlinkTask {
 
 impl Run for BlinkTask {
     fn run(&self) {
-        self.delay.delay_millis(1000);
+        // self.delay.delay_millis(1000);
         critical_section::with(|cs| {
             let mut number = self.number.borrow(cs).borrow_mut();
             *number += 1;
@@ -53,8 +54,8 @@ fn main() -> ! {
     let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
     let peripherals = esp_hal::init(config);
     let timg0 = TimerGroup::new(peripherals.TIMG0);
-    let mut _timer0 = timg0.timer0;
-    _timer0.cnt_start();
+    let timer = PeriodicTimer::new(timg0.timer0);
+    start_timer(timer);
 
     Scheduler::init(task_list![&BLINK_TASK]);
     Scheduler::run();
