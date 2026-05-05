@@ -1,6 +1,7 @@
 use core::cell::RefCell;
 
 use critical_section::{CriticalSection, Mutex};
+use defmt::info;
 use esp_hal::{
     Blocking,
     interrupt::{InterruptHandler, software::SoftwareInterrupt},
@@ -30,9 +31,10 @@ extern "C" fn handler() {
     critical_section::with(|cs| {
         if let Some(ref mut timer) = *TIMER.borrow(cs).borrow_mut() {
             timer.clear_interrupt();
+            info!("Timer interrupt!");
         }
     });
     unsafe {
-        SoftwareInterrupt::<'static, 0>::steal().raise();
+        // SoftwareInterrupt::<'static, 0>::steal().raise();
     }
 }

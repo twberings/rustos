@@ -1,3 +1,7 @@
+use core::alloc::Layout;
+
+use esp_alloc::InternalMemory;
+
 pub trait Run: Sync {
     fn run(&self);
 }
@@ -91,4 +95,9 @@ impl TaskContext {
     pub const fn new() -> Self {
         unsafe { core::mem::zeroed() }
     }
+}
+
+#[repr(align(16))]
+pub(crate) struct Stack<const SIZE: usize> {
+    data: [u8; SIZE],
 }

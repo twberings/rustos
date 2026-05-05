@@ -35,15 +35,24 @@ impl Scheduler {
                 core::arch::asm!("wfi");
             }
 
-            critical_section::with(|cs| {
+            let task = critical_section::with(|cs| {
                 if let Some(ref mut scheduler) = *SCHEDULER.borrow(cs).borrow_mut() {
-                    for task in scheduler.tasks.tasks.iter() {
-                        if let TaskState::Ready = task.state {
-                            task.run();
-                        }
-                    }
+                    scheduler
+                        .tasks
+                        .tasks
+                        .iter()
+                        .find(|task| matches!(task.state, TaskState::Ready))
+                } else {
+                    None
                 }
-            })
+            });
+
+            if let Some(task) = task {
+                info!("Running task");
+                task.run();
+            } else {
+                info!("No available task, sleeping");
+            }
         }
     }
 }

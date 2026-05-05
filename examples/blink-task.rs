@@ -29,18 +29,24 @@ struct BlinkTask {
 
 impl Run for BlinkTask {
     fn run(&self) {
-        // self.delay.delay_millis(1000);
-        critical_section::with(|cs| {
-            let mut number = self.number.borrow(cs).borrow_mut();
-            *number += 1;
-            info!("Blink number: {}", *number);
-        });
+        self.delay.delay_millis(3000);
+        info!("Blink!");
+        // critical_section::with(|cs| {
+        //     let mut number = self.number.borrow(cs).borrow_mut();
+        //     *number += 1;
+        //     info!("Blink number: {}", *number);
+        // });
     }
 }
 
 static BLINK_TASK: BlinkTask = BlinkTask {
     delay: Delay::new(),
     number: Mutex::new(RefCell::new(0)),
+};
+
+static BLINK_TASK2: BlinkTask = BlinkTask {
+    delay: Delay::new(),
+    number: Mutex::new(RefCell::new(100)),
 };
 
 #[allow(
@@ -57,6 +63,6 @@ fn main() -> ! {
     let timer = PeriodicTimer::new(timg0.timer0);
     start_timer(timer);
 
-    Scheduler::init(task_list![&BLINK_TASK]);
+    Scheduler::init(task_list![&BLINK_TASK, &BLINK_TASK2]);
     Scheduler::run();
 }
