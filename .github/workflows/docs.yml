@@ -27,7 +27,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./target/doc
+          path: ./target/riscv32imac-unknown-none-elf/doc
 
   deploy:
     needs: build
