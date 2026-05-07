@@ -23,7 +23,7 @@ jobs:
         run: cargo doc --no-deps --all-features
 
       - name: Add redirect index
-        run: echo '<meta http-equiv="refresh" content="0;url=rustos/index.html">' > ./target/riscv32imac-unknown-none-elf/doc/rustos/index.html
+        run: echo '<meta http-equiv="refresh" content="0;url=rustos/index.html">' > target/riscv32imac-unknown-none-elf/doc/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
