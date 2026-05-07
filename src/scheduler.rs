@@ -49,7 +49,7 @@ impl Scheduler {
 
             if let Some(task) = task {
                 info!("Running task");
-                task.run();
+                // task.run();
             } else {
                 info!("No available task, sleeping");
             }

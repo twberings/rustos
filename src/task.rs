@@ -3,23 +3,23 @@ use core::alloc::Layout;
 use esp_alloc::InternalMemory;
 
 pub trait Run: Sync {
-    fn run(&self);
+    fn run(&mut self);
 }
 
 pub struct Task {
-    runner: &'static dyn Run,
+    runner: &'static mut dyn Run,
     pub state: TaskState,
 }
 
 impl Task {
-    pub const fn new(runner: &'static dyn Run) -> Self {
+    pub const fn new(runner: &'static mut dyn Run) -> Self {
         Task {
             runner,
             state: TaskState::Ready,
         }
     }
 
-    pub fn run(&self) {
+    pub fn run(&mut self) {
         self.runner.run();
     }
 }

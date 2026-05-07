@@ -5,10 +5,33 @@ use defmt::info;
 use esp_hal::clock::CpuClock;
 use esp_hal::main;
 use panic_rtt_target as _;
+use rustos::task::Run;
 
 esp_bootloader_esp_idf::esp_app_desc!();
 
 const STACK_SIZE: usize = 0x10000;
+
+const NUMBER: u32 = 123;
+
+struct Task {
+    number: u32,
+}
+
+impl Run for Task {
+    fn run(&mut self) {
+        let delay = esp_hal::delay::Delay::new();
+
+        let worker_var = 0u32;
+        let worker_sp = core::ptr::addr_of!(worker_var) as usize;
+
+        loop {
+            self.number += 1;
+            info!("Success! Worker stack address: {:x}", worker_sp);
+            info!("Received number: {}", self.number);
+            delay.delay_millis(2000);
+        }
+    }
+}
 
 #[repr(C, align(16))]
 struct Stack<const N: usize>([u8; N]);
@@ -18,7 +41,7 @@ static TASK_STACK: Stack<STACK_SIZE> = Stack([0u8; STACK_SIZE]);
 
 #[unsafe(no_mangle)]
 #[unsafe(naked)]
-unsafe extern "C" fn stack_switch_trampoline() {
+unsafe extern "C" fn stack_switch_trampoline(task: &Task) -> ! {
     core::arch::naked_asm!(
         "
         la t0, {stack_addr}
@@ -32,14 +55,9 @@ unsafe extern "C" fn stack_switch_trampoline() {
         ",
         stack_addr = sym TASK_STACK,
         stack_size = const STACK_SIZE,
-        target_func = sym my_worker_thread,
+        target_func = sym <Task as Run>::run,
+        // number = const NUMBER,
     );
-}
-
-fn function_to_call() {
-    let var = 0u32;
-    let sp = core::ptr::addr_of!(var) as usize;
-    info!("Stack address from a function: {:x}", sp);
 }
 
 #[main]
@@ -55,28 +73,24 @@ fn main() -> ! {
         core::ptr::addr_of!(main_var) as usize
     );
 
-    function_to_call();
+    let task = Task { number: NUMBER };
 
     info!("Switching to static stack...");
 
     unsafe {
-        stack_switch_trampoline();
+        stack_switch_trampoline(&task);
     }
-
-    info!("Trying to read from main stack: {:x}", main_var);
-
-    panic!("Should never return from stack switch");
 }
 
-extern "C" fn my_worker_thread() {
+fn my_worker_thread(number: u32) {
     let delay = esp_hal::delay::Delay::new();
 
     let worker_var = 0u32;
     let worker_sp = core::ptr::addr_of!(worker_var) as usize;
 
-    // loop {
-    info!("Success! Worker stack address: {:x}", worker_sp);
-    function_to_call();
-    delay.delay_millis(2000);
-    // }
+    loop {
+        info!("Success! Worker stack address: {:x}", worker_sp);
+        info!("Received number: {}", number);
+        delay.delay_millis(2000);
+    }
 }
