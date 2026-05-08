@@ -4,6 +4,9 @@ use esp_alloc::InternalMemory;
 
 pub trait Run: Sync {
     fn run(&mut self);
+    fn exit(&mut self) {
+        // Default implementation does nothing
+    }
 }
 
 pub struct Task {
@@ -21,6 +24,7 @@ impl Task {
 
     pub fn run(&mut self) {
         self.runner.run();
+        self.runner.exit();
     }
 }
 

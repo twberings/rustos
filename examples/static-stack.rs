@@ -31,6 +31,11 @@ impl Run for Task {
             delay.delay_millis(2000);
         }
     }
+
+    fn exit(&mut self) {
+        info!("Number is now: {}", self.number);
+        panic!("Task has exited");
+    }
 }
 
 #[repr(C, align(16))]
@@ -47,6 +52,7 @@ unsafe extern "C" fn stack_switch_trampoline(task: &Task) -> ! {
         la t0, {stack_addr}
         
         li t1, {stack_size}
+        la ra, {exit_func}
         add t0, t0, t1
         
         mv sp, t0
@@ -56,7 +62,7 @@ unsafe extern "C" fn stack_switch_trampoline(task: &Task) -> ! {
         stack_addr = sym TASK_STACK,
         stack_size = const STACK_SIZE,
         target_func = sym <Task as Run>::run,
-        // number = const NUMBER,
+        exit_func = sym <Task as Run>::exit,
     );
 }
 
