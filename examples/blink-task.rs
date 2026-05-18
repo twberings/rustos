@@ -17,7 +17,7 @@ use esp_hal::main;
 use esp_hal::timer::PeriodicTimer;
 use esp_hal::timer::timg::TimerGroup;
 use panic_rtt_target as _;
-use rustos::prelude::*;
+use rustos::{prelude::*, static_stack};
 use rustos::timer::start_timer;
 
 esp_bootloader_esp_idf::esp_app_desc!();
@@ -48,6 +48,9 @@ static BLINK_TASK2: BlinkTask = BlinkTask {
     delay: Delay::new(),
     number: Mutex::new(RefCell::new(100)),
 };
+
+static_stack!(STACK1, 0x10000);
+static_stack!(STACK2, 0x10000);
 
 #[allow(
     clippy::large_stack_frames,

@@ -1,6 +1,8 @@
 #![no_std]
 #![no_main]
 
+use core::cell::Cell;
+
 use defmt::info;
 use esp_hal::clock::CpuClock;
 use esp_hal::main;
@@ -14,25 +16,27 @@ const STACK_SIZE: usize = 0x10000;
 const NUMBER: u32 = 123;
 
 struct Task {
-    number: u32,
+    number: Cell<u32>,
 }
 
+unsafe impl Sync for Task {}
+
 impl Run for Task {
-    fn run(&mut self) {
+    fn run(&self) {
         let delay = esp_hal::delay::Delay::new();
 
         let worker_var = 0u32;
         let worker_sp = core::ptr::addr_of!(worker_var) as usize;
 
         loop {
-            self.number += 1;
+            self.number.set(self.number.get() + 1);
             info!("Success! Worker stack address: {:x}", worker_sp);
             info!("Received number: {}", self.number);
             delay.delay_millis(2000);
         }
     }
 
-    fn exit(&mut self) {
+    fn exit(&self) {
         info!("Number is now: {}", self.number);
         panic!("Task has exited");
     }
@@ -79,7 +83,7 @@ fn main() -> ! {
         core::ptr::addr_of!(main_var) as usize
     );
 
-    let task = Task { number: NUMBER };
+    let task = Task { number: Cell::new(NUMBER) };
 
     info!("Switching to static stack...");
 

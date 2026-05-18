@@ -1,25 +1,26 @@
-use core::alloc::Layout;
-
-use esp_alloc::InternalMemory;
-
 pub trait Run: Sync {
-    fn run(&mut self);
-    fn exit(&mut self) {
-        // Default implementation does nothing
-    }
+    fn run(&self);
+    fn exit(&self) {}
 }
 
 pub struct Task {
-    runner: &'static mut dyn Run,
+    runner: &'static dyn Run,
+    context: TaskContext,
     pub state: TaskState,
 }
 
 impl Task {
-    pub const fn new(runner: &'static mut dyn Run) -> Self {
+    pub const fn new(runner: &'static dyn Run) -> Self {
         Task {
             runner,
+            context: TaskContext::new(),
             state: TaskState::Ready,
         }
+    }
+
+    pub fn initialize(&mut self, stack_top: usize) {
+        self.context.initialize_stack(stack_top);
+        self.context.set_entry_point(self);
     }
 
     pub fn run(&mut self) {
@@ -99,9 +100,26 @@ impl TaskContext {
     pub const fn new() -> Self {
         unsafe { core::mem::zeroed() }
     }
+
+    pub fn initialize_stack(&mut self, stack_top: usize) {
+        self.sp = stack_top;
+    }
+
+    pub fn set_entry_point(&mut self, task: *const Task) {
+        self.pc = Task::run as fn(&mut Task) as *const () as usize;
+        self.a0 = task as usize;
+    }
 }
 
 #[repr(align(16))]
-pub(crate) struct Stack<const SIZE: usize> {
-    data: [u8; SIZE],
+pub struct Stack<const SIZE: usize> {
+    pub data: [u8; SIZE],
+}
+
+#[macro_export]
+macro_rules! static_stack {
+    ($name:ident, $size:expr) => {
+        #[unsafe(link_section = ".bss")]
+        static mut $name: Stack<$size> = Stack { data: [0u8; $size] };
+    };
 }
