@@ -123,3 +123,17 @@ macro_rules! static_stack {
         static mut $name: Stack<$size> = Stack { data: [0u8; $size] };
     };
 }
+
+#[macro_export]
+macro_rules! task {
+    ($name:ident, $runner:expr, $stack_size:expr) => {
+        static mut $name: Task = Task::new($runner);
+
+        #[unsafe(link_section = ".bss")]
+        static mut $name_STACK: Stack<$stack_size> = Stack {
+            data: [0u8; $stack_size],
+        };
+
+        $name.initialize(unsafe { $name_STACK.data.as_ptr() as usize + $stack_size });
+    };
+}

@@ -17,8 +17,8 @@ use esp_hal::main;
 use esp_hal::timer::PeriodicTimer;
 use esp_hal::timer::timg::TimerGroup;
 use panic_rtt_target as _;
-use rustos::{prelude::*, static_stack};
 use rustos::timer::start_timer;
+use rustos::{prelude::*, static_stack, task};
 
 esp_bootloader_esp_idf::esp_app_desc!();
 
@@ -39,19 +39,6 @@ impl Run for BlinkTask {
     }
 }
 
-static BLINK_TASK: BlinkTask = BlinkTask {
-    delay: Delay::new(),
-    number: Mutex::new(RefCell::new(0)),
-};
-
-static BLINK_TASK2: BlinkTask = BlinkTask {
-    delay: Delay::new(),
-    number: Mutex::new(RefCell::new(100)),
-};
-
-static_stack!(STACK1, 0x10000);
-static_stack!(STACK2, 0x10000);
-
 #[allow(
     clippy::large_stack_frames,
     reason = "it's not unusual to allocate larger buffers etc. in main"
@@ -66,6 +53,19 @@ fn main() -> ! {
     let timer = PeriodicTimer::new(timg0.timer0);
     start_timer(timer);
 
-    Scheduler::init(task_list![&BLINK_TASK, &BLINK_TASK2]);
+
+    static BLINK_RUNNER: BlinkTask = BlinkTask {
+        delay: Delay::new(),
+        number: Mutex::new(RefCell::new(0)),
+    };
+
+    task!(BLINK_TASK, BLINK_RUNNER, 4096);
+
+    static BLINK_TASK2: BlinkTask = BlinkTask {
+        delay: Delay::new(),
+        number: Mutex::new(RefCell::new(100)),
+    };
+
+    // Scheduler::init(task_list![&BLINK_TASK, &BLINK_TASK2]);
     Scheduler::run();
 }
